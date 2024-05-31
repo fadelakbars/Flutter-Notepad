@@ -18,7 +18,7 @@ class AddNote extends StatefulWidget {
 }
 
 class NoteDetailState extends State<AddNote> {
-  static var _priorities = ['High', 'Low'];
+  static var _priorities = ['Penting', 'Biasa'];
 
   DatabaseHelper helper = DatabaseHelper();
 
@@ -36,70 +36,88 @@ class NoteDetailState extends State<AddNote> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(appBarTitle),
-        leading: IconButton(
+          title: Text(
+            appBarTitle,
+            style: TextStyle(
+                color: Color.fromRGBO(1, 255, 255, 100),
+                fontWeight: FontWeight.bold,
+                fontSize: 30 // Atur warna teks menjadi putih
+                ),
+          ),
+          leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
               // Write some code to control things, when user press back button in AppBar
               moveToLastScreen();
-            }),
-      ),
+            },
+            color: Color.fromRGBO(1, 255, 255, 100),
+          ),
+          actions: <Widget>[
+            PopupMenuButton<String>(
+              icon: Icon(
+                Icons.more_vert,
+                color: Color.fromRGBO(1, 255, 255, 100),
+              ),
+              itemBuilder: (BuildContext context) {
+                return _priorities.map((String priority) {
+                  return PopupMenuItem<String>(
+                    value: priority,
+                    child: Text(priority, style: TextStyle(color: Colors.white)),
+                  );
+                }).toList();
+              },
+              onSelected: (String selectedValue) {
+                setState(() {
+                  debugPrint('User selected $selectedValue');
+                  updatePriorityAsInt(selectedValue);
+                });
+              },
+              color: Color.fromARGB(255,26, 35, 44),
+            ),
+          ]),
       body: Padding(
         padding: EdgeInsets.only(top: 15.0, left: 10.0, right: 10.0),
         child: ListView(
           children: <Widget>[
-            // First element
-            ListTile(
-              title: DropdownButton(
-                  items: _priorities.map((String dropDownStringItem) {
-                    return DropdownMenuItem<String>(
-                      value: dropDownStringItem,
-                      child: Text(dropDownStringItem),
-                    );
-                  }).toList(),
-                  style: textStyle,
-                  value: getPriorityAsString(note.priority),
-                  onChanged: (valueSelectedByUser) {
-                    setState(() {
-                      debugPrint('User selected $valueSelectedByUser');
-                      updatePriorityAsInt(valueSelectedByUser!);
-                    });
-                  }),
-            ),
-
-            // Second Element
+          
             Padding(
-              padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
+              padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
               child: TextField(
                 controller: titleController,
-                style: textStyle,
+                style: TextStyle(color: Colors.white, fontSize: 24),
                 onChanged: (value) {
                   debugPrint('Something changed in Title Text Field');
                   updateTitle();
                 },
                 decoration: InputDecoration(
-                    labelText: 'Title',
+                    hintText: 'Judul',
+                    hintStyle: TextStyle(color: Colors.grey, fontSize: 24),
                     labelStyle: textStyle,
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5.0))),
+                    border: InputBorder.none),
+                    
               ),
             ),
 
             // Third Element
             Padding(
-              padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
+              // padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
+              padding: EdgeInsets.fromLTRB(10, 5, 30, 10),
               child: TextField(
                 controller: descriptionController,
-                style: textStyle,
+                style: TextStyle(color: Colors.white, fontSize: 18),
                 onChanged: (value) {
                   debugPrint('Something changed in Description Text Field');
                   updateDescription();
                 },
                 decoration: InputDecoration(
-                    labelText: 'Description',
+                    // labelText: 'Description',
+                    hintText: 'Isi Catatan',
                     labelStyle: textStyle,
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5.0))),
+                    hintStyle: TextStyle(color: Colors.grey, fontSize: 18),
+                    border: InputBorder.none
+                    ),
+                  maxLines: 20,
+
               ),
             ),
 
@@ -110,31 +128,22 @@ class NoteDetailState extends State<AddNote> {
                 children: <Widget>[
                   Expanded(
                     child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color.fromRGBO(1, 255, 245, 100), // Background color
+                        foregroundColor: Colors.white, // Text color
+                        padding: EdgeInsets.symmetric(vertical: 10), // Padding inside the button
+                        textStyle: TextStyle(
+                          fontSize: 14, // Font size of the text
+                        ),
+                      ),
                       child: Text(
-                        'Save',
+                        'Simpan',
                         textScaleFactor: 1.5,
                       ),
                       onPressed: () {
                         setState(() {
                           debugPrint("Save button clicked");
                           _save();
-                        });
-                      },
-                    ),
-                  ),
-                  Container(
-                    width: 5.0,
-                  ),
-                  Expanded(
-                    child: ElevatedButton(
-                      child: Text(
-                        'Cancel',
-                        textScaleFactor: 1.5,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          debugPrint("Cancel button clicked");
-                          moveToLastScreen();
                         });
                       },
                     ),
@@ -155,10 +164,10 @@ class NoteDetailState extends State<AddNote> {
   // Convert the String priority in the form of integer before saving it to Database
   void updatePriorityAsInt(String value) {
     switch (value) {
-      case 'High':
+      case 'Penting':
         note.priority = 1;
         break;
-      case 'Low':
+      case 'Biasa':
         note.priority = 2;
         break;
     }
@@ -193,20 +202,19 @@ class NoteDetailState extends State<AddNote> {
     moveToLastScreen();
     note.date = DateFormat.yMMMd().format(DateTime.now());
     int result;
-      result = await helper.insertNote(note);
+    result = await helper.insertNote(note);
 
     if (result != 0) {
       // Success
-      _showAlertDialog('Status', 'Note Saved Successfully');
+      // _showAlertDialog('Status', 'Note Saved Successfully');
     } else {
       // Failure
-      _showAlertDialog('Status', 'Problem Saving Note');
+      // _showAlertDialog('Status', 'Problem Saving Note');
     }
   }
 
   void _delete() async {
     moveToLastScreen();
-
   }
 
   void _showAlertDialog(String title, String message) {

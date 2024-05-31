@@ -11,10 +11,21 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return MaterialApp(
-      title: 'NoteKeeper',
+      title: 'Onyx Note',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-          primarySwatch: Colors.deepPurple
+        primaryColor: Color.fromRGBO(26, 37, 60, 1),
+        scaffoldBackgroundColor: Color.fromRGBO(26, 37, 60, 1),
+        appBarTheme: AppBarTheme(
+          backgroundColor: Color.fromRGBO(26, 37, 60, 1),
+        ),
+        tooltipTheme: TooltipThemeData(
+          textStyle: TextStyle(color: Colors.white), // Warna teks tooltip
+          decoration: BoxDecoration(
+            color: Colors.white, // Warna latar belakang tooltip
+            borderRadius: BorderRadius.circular(5),
+          ),
+        ),
       ),
       home: NoteList(),
     );
